@@ -93,15 +93,48 @@ async function actualizarConcierto(client) {
     return;
   }
 
-  const result = await collection.updateOne(
-    { _id: choiceAnswer.conciertoId },
-    { $set: updates }
-  );
+  const result = await collection.updateOne({ _id: choiceAnswer.conciertoId }, { $set: updates });
 
   if (result.modifiedCount > 0) {
     console.log("\n✅ Concierto actualizado con éxito.");
   } else {
     console.log("\n❌ No se pudo actualizar el concierto o no se hicieron cambios.");
+  }
+}
+
+// NUEVA FUNCIÓN para eliminar un concierto
+async function eliminarConcierto(client) {
+  console.log("\n--- Eliminar un Concierto ---");
+  // 1. Buscar el concierto a eliminar
+  const searchAnswer = await inquirer.prompt([{ type: 'input', name: 'artista', message: 'Busca al artista del concierto que quieres eliminar:' }]);
+  
+  const collection = client.db(dbName).collection('conciertos');
+  const conciertos = await collection.find({ artista: { $regex: searchAnswer.artista, $options: 'i' } }).toArray();
+
+  if (conciertos.length === 0) {
+    console.log("No se encontraron conciertos para ese artista.");
+    return;
+  }
+
+  // 2. Permitir al usuario elegir cuál
+  const choices = conciertos.map(c => ({ name: `${c.artista} - ${c.evento} (${new Date(c.fecha).getFullYear()})`, value: c._id }));
+  const choiceAnswer = await inquirer.prompt([{ type: 'list', name: 'conciertoId', message: 'Selecciona el concierto exacto que quieres eliminar:', choices }]);
+  
+  // 3. Confirmación final
+  const confirmAnswer = await inquirer.prompt([{ type: 'confirm', name: 'confirmar', message: '¿Estás seguro de que quieres eliminar este concierto? Esta acción no se puede deshacer.', default: false }]);
+
+  if (!confirmAnswer.confirmar) {
+    console.log("Eliminación cancelada.");
+    return;
+  }
+
+  // 4. Ejecutar la eliminación en la BD
+  const result = await collection.deleteOne({ _id: choiceAnswer.conciertoId });
+
+  if (result.deletedCount > 0) {
+    console.log("\n✅ Concierto eliminado con éxito.");
+  } else {
+    console.log("\n❌ No se pudo eliminar el concierto.");
   }
 }
 
@@ -137,7 +170,10 @@ async function main() {
         case 'Buscar un concierto': await buscarConcierto(client); break;
         case 'Añadir un nuevo concierto': await anadirConcierto(client); break;
         case 'Actualizar un concierto': await actualizarConcierto(client); break;
-        case 'Eliminar un concierto': console.log("Próximamente..."); break; // Placeholder
+        case 'Eliminar un concierto': 
+          // LLAMAMOS A LA NUEVA FUNCIÓN DE ELIMINAR
+          await eliminarConcierto(client);
+          break;
         case 'Salir': run = false; break;
         default: console.log("Opción no implementada aún."); break;
       }
