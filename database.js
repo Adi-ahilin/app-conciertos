@@ -1,9 +1,19 @@
+// CAMBIO 1: Importar y configurar dotenv al principio de todo.
+require('dotenv').config();
+
 const { MongoClient } = require('mongodb');
 
 // ---- CONFIGURACIÓN ----
-const uri = "mongodb+srv://Adi:151217Ar.@clusteradi.lfk227c.mongodb.net/catalogoMusical?retryWrites=true&w=majority";
+// CAMBIO 2: Leer la variable del archivo .env en lugar de tenerla escrita aquí.
+const uri = process.env.MONGO_URI;
 const dbName = 'catalogoMusical';
 // --------------------
+
+// Es una buena práctica verificar que la variable de entorno exista.
+if (!uri) {
+  console.error("Error: La variable de entorno MONGO_URI no está definida en el archivo .env");
+  process.exit(1);
+}
 
 const client = new MongoClient(uri);
 
