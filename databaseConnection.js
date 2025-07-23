@@ -1,21 +1,21 @@
-// Importar y configurar dotenv al principio de todo.
 require('dotenv').config();
 
 const { MongoClient } = require('mongodb');
 
-// CAMBIO 2: Leer la variable del archivo .env en lugar de tenerla escrita aquí.
+// --- Configuración de la Conexión ---
 const uri = process.env.MONGO_URI;
 const dbName = 'catalogoMusical';
-// --------------------
 
-// verificar variable de entorno.
+// Valida la existencia de la cadena de conexión antes de continuar
 if (!uri) {
-  console.error("Error: La variable de entorno MONGO_URI no está definida en el archivo .env");
+  console.error("Error: La variable de entorno MONGO_URI no está definida.");
   process.exit(1);
 }
 
+// Inicializa el cliente de MongoDB con la URI de conexión
 const client = new MongoClient(uri);
 
+// Función para conectar a la base de datos y devolver la instancia 'db'
 async function connectDB() {
   try {
     await client.connect();
@@ -23,9 +23,10 @@ async function connectDB() {
     return client.db(dbName);
   } catch (error) {
     console.error("Error al conectar a la base de datos:", error);
-    process.exit(1); // Salir del programa si no se puede conectar
+    process.exit(1); 
   }
 }
+
 
 async function closeDB() {
   try {

@@ -1,6 +1,9 @@
 const inquirer = require('inquirer');
 const { validarTexto, validarFecha } = require('./validators');
-
+// ===================================================================================
+// FUNCIÓN DE LECTURA (READ): Muestra todos los conciertos o filtra por género y evento.
+// Utiliza el operador lógico $and para combinar filtros.
+// ===================================================================================
 async function verTodosLosConciertos(db) {
   try {
     const answer = await inquirer.prompt({
@@ -69,7 +72,11 @@ async function verTodosLosConciertos(db) {
     console.error("\n❌ Error al intentar obtener los conciertos:", error);
   }
 }
-
+// ===================================================================================
+// FUNCIÓN DE LECTURA CON FILTROS (READ): Busca conciertos por diferentes criterios.
+// Utiliza operadores de comparación ($regex) y lógicos ($or, $and).
+// Permite buscar en campos anidados (ej: lugar.pais).
+// ===================================================================================
 async function buscarConcierto(db) {
   try {
     const searchFieldAnswer = await inquirer.prompt([{
@@ -148,7 +155,12 @@ async function buscarConcierto(db) {
   }
 }
 
-// TU FUNCIÓN AÑADIR CONCIERTO
+// ===================================================================================
+// FUNCIÓN DE CREACIÓN (CREATE): Añade un nuevo documento a la base de datos.
+// Incluye validación de datos de entrada para asegurar la coherencia
+// y un paso de confirmación antes de guardar.
+// ===================================================================================
+
 async function anadirConcierto(db) {
   try {
     const confirmacionInicial = await inquirer.prompt([{
@@ -263,6 +275,11 @@ async function anadirConcierto(db) {
   }
 }
 
+// ===================================================================================
+// FUNCIÓN DE ACTUALIZACIÓN (UPDATE): Modifica un documento existente.
+// Busca un documento, permite al usuario seleccionar uno de una lista,
+// y luego actualiza los campos específicos, incluyendo subdocumentos.
+// ===================================================================================
 async function actualizarConcierto(db) {
   try {
     console.log("\n--- Actualizar un Concierto ---");
@@ -325,8 +342,7 @@ async function actualizarConcierto(db) {
     ]);
 
     const updates = {};
-    // Compara cada campo y lo añade al objeto 'updates' solo si cambió
-    if (updateAnswers.artista !== conciertoAActualizar.artista) updates.artista = updateAnswers.artista;
+      if (updateAnswers.artista !== conciertoAActualizar.artista) updates.artista = updateAnswers.artista;
     if (updateAnswers.evento !== conciertoAActualizar.evento) updates.evento = updateAnswers.evento;
     if (updateAnswers.fecha && (new Date(updateAnswers.fecha).getTime() !== conciertoAActualizar.fecha.getTime())) {
       updates.fecha = new Date(updateAnswers.fecha);
@@ -352,7 +368,11 @@ async function actualizarConcierto(db) {
     console.error("\n❌ Error al intentar actualizar el concierto:", error);
   }
 }
-
+// ===================================================================================
+// FUNCIÓN DE ELIMINACIÓN (DELETE): Borra un documento de la base de datos.
+// Incluye un proceso de búsqueda y selección seguro, y una confirmación
+// final para evitar eliminaciones accidentales.
+// ===================================================================================
 async function eliminarConcierto(db) {
   try {
     console.log("\n--- Eliminar un Concierto ---");

@@ -1,3 +1,7 @@
+// ==========================================================
+// Punto de Entrada de la Aplicación (index.js)
+// ==========================================================
+
 const inquirer = require('inquirer');
 const { connectDB, closeDB } = require('./databaseConnection.js');
 const {
@@ -9,9 +13,11 @@ const {
 } = require('./functions');
 
 
+// --- Función Principal ---
 async function main() {
   const db = await connectDB();
 
+  // Bucle del menú principal
   let run = true;
   while (run) {
     const answers = await inquirer.prompt([
@@ -31,6 +37,7 @@ async function main() {
       },
     ]);
 
+    // Controlador de acciones del menú
     switch (answers.action) {
       case 'Ver todos los conciertos': await verTodosLosConciertos(db); break;
       case 'Buscar un concierto': await buscarConcierto(db); break;
@@ -48,4 +55,5 @@ async function main() {
   await closeDB();
 }
 
+// --- Inicio del Programa ---
 main();

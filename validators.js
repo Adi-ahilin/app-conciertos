@@ -1,4 +1,6 @@
+// Módulo con funciones reutilizables para validar la entrada del usuario.
 
+// Valida que la entrada de texto no esté vacía ni sea puramente numérica.
 const validarTexto = (input, nombreCampo) => {
   if (input.trim() === '') {
     return `El campo '${nombreCampo}' no puede estar vacío.`;
@@ -9,6 +11,7 @@ const validarTexto = (input, nombreCampo) => {
   return true;
 };
 
+// Valida que la entrada de fecha cumpla el formato YYYY-MM-DD.
 const validarFecha = (input) => {
   if (input.trim() === '') return true;
 
@@ -23,6 +26,7 @@ const validarFecha = (input) => {
   return true;
 };
 
+// Exporta los validadores para su uso en otros módulos.
 module.exports = {
   validarTexto,
   validarFecha,
