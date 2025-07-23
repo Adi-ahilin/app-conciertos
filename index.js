@@ -1,5 +1,5 @@
 const inquirer = require('inquirer');
-const { connectDB, closeDB } = require('./database');
+const { connectDB, closeDB } = require('./databaseConnection.js');
 const {
   verTodosLosConciertos,
   buscarConcierto,
