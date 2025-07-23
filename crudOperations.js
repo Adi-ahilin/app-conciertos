@@ -1,8 +1,8 @@
 const inquirer = require('inquirer');
 const { validarTexto, validarFecha } = require('./validators');
 // ===================================================================================
-// FUNCIÓN DE LECTURA (READ): Muestra todos los conciertos o filtra por género y evento.
-// Utiliza el operador lógico $and para combinar filtros.
+// FUNCIÓN DE LECTURA (READ): Muestra todos los conciertos o muestra por género y evento.
+// Utiliza el operador lógico $and.
 // ===================================================================================
 async function verTodosLosConciertos(db) {
   try {
@@ -11,61 +11,41 @@ async function verTodosLosConciertos(db) {
       name: 'choice',
       message: '¿Qué deseas hacer en "Ver Conciertos"?',
       choices: [
-        'Mostrar todos los conciertos',
-        'Buscar por género y evento', 
+        'Mostrar catálogo completo',
+        'Mostrar solo Género y Evento', // <-- Opción simplificada
         new inquirer.Separator(),
         'Volver al menú principal'
       ]
     });
 
+    if (answer.choice === 'Volver al menú principal') {
+      return;
+    }
+
     const collection = db.collection('conciertos');
+    const conciertos = await collection.find({}).toArray();
 
-    if (answer.choice === 'Mostrar todos los conciertos') {
-      const conciertos = await collection.find({}).toArray();
-      if (conciertos.length > 0) {
-        console.log("\n--- Catálogo Completo de Conciertos ---");
-        console.table(conciertos.map(c => ({
-          Artista: c.artista,
-          Evento: c.evento,
-          Fecha: new Date(c.fecha).toLocaleDateString(),
-          País: c.lugar.pais
-        })));
-      } else {
-        console.log("No hay conciertos en el catálogo.");
-      }
-    } else if (answer.choice === 'Buscar por género y evento') { 
-      const filters = await inquirer.prompt([
-        { type: 'input', name: 'genero', message: 'Buscar por género (deja en blanco para ignorar):' },
-        { type: 'input', name: 'evento', message: 'Buscar por evento (deja en blanco para ignorar):' }
-      ]);
+    if (conciertos.length === 0) {
+      console.log("No hay conciertos en el catálogo.");
+      return;
+    }
 
-      const conditions = [];
-      if (filters.genero.trim() !== '') {
-        conditions.push({ genero: { $regex: filters.genero, $options: 'i' } });
-      }
-      if (filters.evento.trim() !== '') {
-        conditions.push({ evento: { $regex: filters.evento, $options: 'i' } });
-      }
-
-      let query = {};
-      if (conditions.length > 0) {
-        query = { $and: conditions };
-      }
-      
-      const conciertos = await collection.find(query).toArray();
-      if (conciertos.length > 0) {
-        // --- CAMBIO DE TEXTO ---
-        console.log("\n--- Resultados de la Búsqueda ---");
-        // --- FIN DEL CAMBIO ---
-        console.table(conciertos.map(c => ({
-          Artista: c.artista,
-          Evento: c.evento,
-          Género: c.genero,
-          Fecha: new Date(c.fecha).toLocaleDateString()
-        })));
-      } else {
-        console.log("No se encontraron conciertos que cumplan con los criterios.");
-      }
+    if (answer.choice === 'Mostrar catálogo completo') {
+      console.log("\n--- Catálogo Completo de Conciertos ---");
+      console.table(conciertos.map(c => ({
+        Artista: c.artista,
+        Género: c.genero,
+        Evento: c.evento,
+        Fecha: new Date(c.fecha).toLocaleDateString(),
+        País: c.lugar.pais
+      })));
+    } else if (answer.choice === 'Mostrar solo Género y Evento') {
+      console.log("\n--- Vista por Género y Evento ---");
+      console.table(conciertos.map(c => ({
+        Artista: c.artista,
+        Género: c.genero,
+        Evento: c.evento
+      })));
     }
     
   } catch (error) {
